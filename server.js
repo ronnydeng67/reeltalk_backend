@@ -1,5 +1,6 @@
 const express = require('express');
-
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const PORT = 8080;
 
 const app = express();
@@ -12,6 +13,7 @@ admin.initializeApp({
     credential: admin.credential.cert(credentials)
 });
 
+const db = admin.firestore();
 
 app.use(bodyParser.json());
 
@@ -24,10 +26,18 @@ app.get('/', (req, res) => {
 app.post('/signup', async(req, res) => {
     try {
         const { email, password } = req.body;
+        const hashedPassword = await bcrypt.hash(password, 10);
         const user = await admin.auth().createUser({
             email: email,
-            password: password
+            password: hashedPassword
         });
+        const token = jwt.sign({ uid: user.uid }, 'secret-key');
+
+        await db.collection('users').doc(user.uid).set({
+            email,
+            hashedPassword,
+            token
+        })
         res.json({ message: "Sign up successfully!"})
     } catch (err) {
         res.json({ message: "Sign up failed!"})
@@ -52,6 +62,5 @@ app.post('/reset', async(req, res) => {
         res.json({ message: "Password reset successfully!"})
     } catch (err) {
         res.json({ message: "Something went wrong, please confirm you typed in the correct email!"})
-        
     }
 })
