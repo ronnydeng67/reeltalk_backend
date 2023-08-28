@@ -1,6 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+// const jwt = require('jsonwebtoken');
 const PORT = 8080;
 
 const app = express();
@@ -26,17 +26,18 @@ app.get('/', (req, res) => {
 app.post('/signup', async(req, res) => {
     try {
         const { email, password } = req.body;
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
         const user = await admin.auth().createUser({
             email: email,
             password: hashedPassword
         });
-        const token = jwt.sign({ uid: user.uid }, 'secret-key');
+        // const token = jwt.sign({ uid: user.uid }, 'secret-key');
 
         await db.collection('users').doc(user.uid).set({
             email,
             hashedPassword,
-            token
+            // token
         })
         res.json({ message: "Sign up successfully!"})
     } catch (err) {
@@ -46,8 +47,14 @@ app.post('/signup', async(req, res) => {
 
 app.post('/login', async(req, res) => {
     try {
-        const { email } = req.body;
-        const user = await admin.auth().getUserByEmail(email);
+        const { email, password } = req.body;
+        // const user = await admin.auth().getUserByEmail(email);
+        const user = await db.collection('users').where('email', '==', email).limit(1).get();
+        if (user.empty) return res.json({ message: 'User not found'})
+        // console.log(user.docs[0].data().hashedPassword)
+        const isPasswordMatch = await bcrypt.compare(password, user.docs[0].data().hashedPassword)
+        if (!isPasswordMatch) return res.json({ message: "Invaild credentials"})
+        // console.log(user.docs[0].data().token)
         res.json({ message: "Login successful!"})
     } catch (err) {
         res.json({ message: "Login failed!"})
