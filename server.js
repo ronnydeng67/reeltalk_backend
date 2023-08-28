@@ -52,5 +52,6 @@ app.post('/reset', async(req, res) => {
         res.json({ message: "Password reset successfully!"})
     } catch (err) {
         res.json({ message: "Something went wrong, please confirm you typed in the correct email!"})
+        
     }
 })
