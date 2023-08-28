@@ -1,6 +1,3 @@
-// import { initializeApp } from "firebase/app";
-// import { getAnalytics } from "firebase/analytics";
-
 const express = require('express');
 
 const PORT = 8080;
@@ -15,7 +12,6 @@ admin.initializeApp({
     credential: admin.credential.cert(credentials)
 });
 
-// const analytics = getAnalytics(app);
 
 app.use(bodyParser.json());
 
@@ -40,10 +36,21 @@ app.post('/signup', async(req, res) => {
 
 app.post('/login', async(req, res) => {
     try {
-        const { email, password } = req.body;
-        const suer = await admin.auth().getUserByEmail(email);
+        const { email } = req.body;
+        const user = await admin.auth().getUserByEmail(email);
         res.json({ message: "Login successful!"})
     } catch (err) {
         res.json({ message: "Login failed!"})
+    }
+})
+
+app.post('/reset', async(req, res) => {
+    try {
+        const { email, newPassword } = req.body;
+        const user = await admin.auth().getUserByEmail(email);
+        await admin.auth().updateUser(user.uid, {password: newPassword})
+        res.json({ message: "Password reset successfully!"})
+    } catch (err) {
+        res.json({ message: "Something went wrong, please confirm you typed in the correct email!"})
     }
 })
