@@ -77,3 +77,28 @@ app.post('/reset', async(req, res) => {
         res.json({ message: "Something went wrong, please confirm you typed in the correct email!"})
     }
 })
+
+
+app.post('/add-like', async (req, res) => {
+    try {
+        const { userId, postId } = req.body;
+        const userDoc = db.collection('users').doc(userId)
+        const user = await userDoc.get();
+        console.log(user)
+        if (!user) return res.json({ message: "No user found!"})
+
+        const userData = user.data();
+        const userLikes = userData.likes || [];
+
+        if (!userLikes.includes(postId)) {
+            userLikes.push(postId)
+        }
+
+        await userDoc.update({ likes: userLikes })
+        res.json({ message: "You just liked this post!"})
+    } catch (err) {
+        res.json({ message: "Something went wrong, please try again later!"})
+    }
+})
+
+
