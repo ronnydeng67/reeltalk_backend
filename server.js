@@ -50,7 +50,7 @@ app.post('/login', async(req, res) => {
         const { email, password } = req.body;
         // const user = await admin.auth().getUserByEmail(email);
         const user = await db.collection('users').where('email', '==', email).limit(1).get();
-        if (user.empty) return res.json({ message: 'User not found'})
+        if (user.empty) return res.json({ message: 'User not found, please ensure you are using correct email!'})
         // console.log(user.docs[0].data().hashedPassword)
         const isPasswordMatch = await bcrypt.compare(password, user.docs[0].data().hashedPassword)
         if (!isPasswordMatch) return res.json({ message: "Invaild credentials"})
@@ -63,9 +63,15 @@ app.post('/login', async(req, res) => {
 
 app.post('/reset', async(req, res) => {
     try {
-        const { email, newPassword } = req.body;
+        const { email, password } = req.body;
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
         const user = await admin.auth().getUserByEmail(email);
-        await admin.auth().updateUser(user.uid, {password: newPassword})
+        await admin.auth().updateUser(user.uid, {password: hashedPassword})
+        await db.collection('users').doc(user.uid).update({
+            email,
+            hashedPassword,
+        })
         res.json({ message: "Password reset successfully!"})
     } catch (err) {
         res.json({ message: "Something went wrong, please confirm you typed in the correct email!"})
