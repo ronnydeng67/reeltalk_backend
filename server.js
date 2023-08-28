@@ -26,17 +26,6 @@ app.get('/', (req, res) => {
 })
 
 app.post('/signup', async(req, res) => {
-    // const user = {
-    //     email: req.body.email,
-    //     password: req.body.password
-    // }
-    // const userResponse = await admin.auth().createUser({
-    //     email: user.email,
-    //     password: user.password,
-    //     emailVerified: false,
-    //     disabled: false
-    // })
-    // res.json(userResponse);
     try {
         const { email, password } = req.body;
         const user = await admin.auth().createUser({
@@ -46,5 +35,15 @@ app.post('/signup', async(req, res) => {
         res.json({ message: "Sign up successfully!"})
     } catch (err) {
         res.json({ message: "Sign up failed!"})
+    }
+})
+
+app.post('/login', async(req, res) => {
+    try {
+        const { email, password } = req.body;
+        const suer = await admin.auth().getUserByEmail(email);
+        res.json({ message: "Login successful!"})
+    } catch (err) {
+        res.json({ message: "Login failed!"})
     }
 })
