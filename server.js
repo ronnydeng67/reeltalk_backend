@@ -26,15 +26,25 @@ app.get('/', (req, res) => {
 })
 
 app.post('/signup', async(req, res) => {
-    const user = {
-        email: req.body.email,
-        password: req.body.password
+    // const user = {
+    //     email: req.body.email,
+    //     password: req.body.password
+    // }
+    // const userResponse = await admin.auth().createUser({
+    //     email: user.email,
+    //     password: user.password,
+    //     emailVerified: false,
+    //     disabled: false
+    // })
+    // res.json(userResponse);
+    try {
+        const { email, password } = req.body;
+        const user = await admin.auth().createUser({
+            email: email,
+            password: password
+        });
+        res.json({ message: "Sign up successfully!"})
+    } catch (err) {
+        res.json({ message: "Sign up failed!"})
     }
-    const userResponse = await admin.auth().createUser({
-        email: user.email,
-        password: user.password,
-        emailVerified: false,
-        disabled: false
-    })
-    res.json(userResponse);
 })
