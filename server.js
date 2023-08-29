@@ -8,6 +8,8 @@ const app = express();
 const bodyParser = require('body-parser');
 const admin = require('firebase-admin');
 const credentials = require('./reel-talk-backend-firebase-adminsdk-dhaqm-929a64f8fc.json')
+const url = 'https://api.themoviedb.org/3/authentication';
+const axios = require('axios');
 
 admin.initializeApp({
     credential: admin.credential.cert(credentials)
@@ -115,3 +117,17 @@ app.get('/like/:userId', async (req, res) => {
     }
 })
 
+app.get('/movies', async (req, res) => {
+    try {
+        const apiKey = "10209120d509162552fda65926e2ed59";
+        const response = await axios.get(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en&sort_by=popularity.desc`)
+        const movies = response.data.results;
+        const arr = [];
+        for (let movie of movies) {
+            arr.push(movie.title)
+        }
+        res.json(arr)
+    } catch (err) {
+        res.json(err)
+    }
+})
