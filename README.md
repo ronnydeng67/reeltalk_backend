@@ -17,6 +17,7 @@
 
 ## Sample State
 
+```
 {
     users: {
         userUid: {
@@ -26,3 +27,4 @@
         }
     }
 }
+```
