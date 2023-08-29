@@ -84,7 +84,6 @@ app.post('/add-like', async (req, res) => {
         const { userId, postId } = req.body;
         const userDoc = db.collection('users').doc(userId)
         const user = await userDoc.get();
-        console.log(user)
         if (!user) return res.json({ message: "No user found!"})
 
         const userData = user.data();
@@ -101,4 +100,18 @@ app.post('/add-like', async (req, res) => {
     }
 })
 
+app.get('/like/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const userDoc = db.collection('users').doc(userId);
+        const user = await userDoc.get();
+        if (!user) return res.json({ message: "No user found!"})
+
+        const userData = user.data();
+        const userLikes = userData.likes || [];
+        res.json({ likes: userLikes})
+    } catch (err) {
+        res.json({ message: "Failed to load you likes!"})
+    }
+})
 
