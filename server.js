@@ -48,10 +48,9 @@ app.post('/signup', async(req, res) => {
 app.post('/login', async(req, res) => {
     try {
         const { email, password } = req.body;
-        // const user = await admin.auth().getUserByEmail(email);
         const user = await db.collection('users').where('email', '==', email).limit(1).get();
         if (user.empty) return res.json({ message: 'User not found, please ensure you are using correct email!'})
-        // console.log(user.docs[0].data().hashedPassword)
+        //data() to extract the actual js object
         const isPasswordMatch = await bcrypt.compare(password, user.docs[0].data().hashedPassword)
         if (!isPasswordMatch) return res.json({ message: "Invaild credentials"})
         // console.log(user.docs[0].data().token)
@@ -106,12 +105,13 @@ app.get('/like/:userId', async (req, res) => {
         const userDoc = db.collection('users').doc(userId);
         const user = await userDoc.get();
         if (!user) return res.json({ message: "No user found!"})
-
+        // console.log(user)
         const userData = user.data();
+        // console.log(userData)
         const userLikes = userData.likes || [];
         res.json({ likes: userLikes})
     } catch (err) {
-        res.json({ message: "Failed to load you likes!"})
+        res.json({ message: "Failed to load your likes!"})
     }
 })
 
