@@ -117,10 +117,11 @@ app.get('/like/:userId', async (req, res) => {
     }
 })
 
-app.get('/movies', async (req, res) => {
+app.get('/movies/:page', async (req, res) => {
     try {
+        const page = req.params.page
         const apiKey = "10209120d509162552fda65926e2ed59";
-        const response = await axios.get(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en&sort_by=popularity.desc`)
+        const response = await axios.get(`https://api.themoviedb.org/3/discover/movie?api_key=${apiKey}&language=en&sort_by=popularity.desc&page=${page}`)
         const movies = response.data.results;
         const arr = [];
         for (let movie of movies) {
